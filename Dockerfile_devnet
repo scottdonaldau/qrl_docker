@@ -1,0 +1,38 @@
+#Download base ubuntu image
+FROM ubuntu:16.04
+RUN apt-get update
+RUN apt-get -y install ca-certificates curl
+
+# Prepare pip
+RUN apt-get -y install python-pip
+RUN apt-get -y install git
+RUN apt-get -y install socat
+RUN pip install --upgrade pip
+
+# Get a clean copy of the latest code
+RUN rm -rf /root/QRL
+RUN git clone https://github.com/theQRL/QRL.git /root/QRL
+RUN pip install -r /root/QRL/requirements.txt
+
+# Update QRL config to use devnet hostnames
+RUN sed -i 's/104\.237\.3\.184/dev1/' /root/QRL/qrl/core/config.py
+RUN sed -i 's/104\.237\.3\.185/dev2/' /root/QRL/qrl/core/config.py
+RUN sed -i 's/104\.251\.219\.215/dev3/' /root/QRL/qrl/core/config.py
+RUN sed -i 's/104\.251\.219\.145/dev4/' /root/QRL/qrl/core/config.py
+RUN sed -i 's/104\.251\.219\.40/dev5/' /root/QRL/qrl/core/config.py
+
+# Update Genesis block
+RUN sed -i 's/Qcfdf7d621b49eeb57e7f7cc7b7218d6798e951e32f9c217512970ddac29dda8b7ac9/Qa9bee2d049d21c86ca0ad2160f47013bff3e124f64534e8e0a259109942a6f658fba/' /root/QRL/qrl/core/CreateGenesisBlock.py
+RUN sed -i 's/Q809f7db42ac322d082823f1d79c2d95220acaf176c8f31bb53e3c474ccf41034e9be/Q929a0ae1295a27ac41f91dd3bb395ef2aa30322f5e81e83e841017804c3f624278a4/' /root/QRL/qrl/core/CreateGenesisBlock.py
+RUN sed -i 's/Qc0f401290da148f421eac9ed7f1992f3f581dd89a77b00da895b24c85b09a3afc780/Q30b3a92f55d17ae0ef87e162c90790b2262c8130c2a4b7e626678a149a63170dc00a/' /root/QRL/qrl/core/CreateGenesisBlock.py
+RUN sed -i 's/Qccf9bcbc30b2c125d4d36ad8888517874d28ccdc4a17c3bdd7b67743d103317b6342/Q6c999b32e06a3095caa15c850d3d592fb60a8d6efcb18dc503e5c2d4d57c86795c0b/' /root/QRL/qrl/core/CreateGenesisBlock.py
+RUN sed -i 's/Q54610ec804e32e8cacfcc5786f89381816d0dbbe0145b26511b22d37347e641ab3e2/Qb267740d8c322e15cb207e9bf64c9f40eaf5864bcd4540f91a6d3b3b45aff03632fb/' /root/QRL/qrl/core/CreateGenesisBlock.py
+
+# Update required stakers to 2
+RUN sed -i 's/minimum_required_stakers = 5/minimum_required_stakers = 2/' /root/QRL/qrl/core/config.py
+
+# COPY - Copy configuration/scripts
+COPY scripts/start.sh /root/start.sh
+
+# START SCRIPT
+CMD ["/root/start.sh"]
